@@ -6,6 +6,7 @@ import com.sekusarisu.yanami.data.local.preferences.UserPreferencesRepository
 import com.sekusarisu.yanami.data.remote.buildKomariWebSocketEndpoint
 import com.sekusarisu.yanami.data.remote.runKomariWebSocketLifecycle
 import com.sekusarisu.yanami.data.remote.SessionManager
+import com.sekusarisu.yanami.data.remote.KomariAdminClientService
 import com.sekusarisu.yanami.domain.model.TerminalSnippet
 import com.sekusarisu.yanami.domain.model.AuthType
 import com.sekusarisu.yanami.domain.repository.ServerRepository
@@ -40,7 +41,8 @@ class SshTerminalViewModel(
         private val serverRepository: ServerRepository,
         private val sessionManager: SessionManager,
         private val httpClient: HttpClient,
-        private val userPreferencesRepository: UserPreferencesRepository
+        private val userPreferencesRepository: UserPreferencesRepository,
+        private val adminClientService: KomariAdminClientService
 ) :
         MviViewModel<SshTerminalContract.State, SshTerminalContract.Event, SshTerminalContract.Effect>(
                 SshTerminalContract.State()
@@ -221,19 +223,35 @@ class SshTerminalViewModel(
                         return@launch
                     }
 
-                    val endpoint =
-                            buildKomariWebSocketEndpoint(
-                                    server.baseUrl,
-                                    "/api/admin/client/$uuid/terminal"
-                            )
                     val authType = sessionManager.getAuthType() ?: AuthType.PASSWORD
 
                     Log.d(TAG, "Preparing terminal WebSocket (authType=$authType)")
 
                     try {
+                        val remoteSession =
+                                adminClientService.createRemoteSession(
+                                        baseUrl = server.baseUrl,
+                                        sessionToken = sessionToken,
+                                        authType = authType,
+                                        uuid = uuid
+                                )
+                        val endpoint =
+                                buildKomariWebSocketEndpoint(
+                                        server.baseUrl,
+                                        "/api/admin/client/remote"
+                                )
                         val wsBlock: suspend DefaultClientWebSocketSession.() -> Unit = {
                             Log.d(TAG, "WebSocket connected")
                             val wsSession = this
+                            wsSession.send(
+                                    Frame.Text(
+                                            buildJsonObject {
+                                                put("type", "auth")
+                                                put("session_id", remoteSession.sessionId)
+                                                put("ticket", remoteSession.browserTicket)
+                                            }.toString()
+                                    )
+                            )
                             setState { copy(isConnecting = false, isConnected = true) }
 
                             // 建连后立即发送初始 resize（使用 onSizeChanged 已缓存的实际尺寸）

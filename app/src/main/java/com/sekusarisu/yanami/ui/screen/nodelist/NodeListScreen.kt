@@ -32,9 +32,7 @@ import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
-import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.platform.LocalContext
@@ -70,7 +68,6 @@ class NodeListScreen : Screen {
         val context = LocalContext.current
         val lifecycleOwner = LocalLifecycleOwner.current
         val adaptiveInfo = rememberAdaptiveLayoutInfo()
-        var isAllExpanded by remember { mutableStateOf(true) }
 
         DisposableEffect(lifecycleOwner, viewModel) {
             if (lifecycleOwner.lifecycle.currentState.isAtLeast(Lifecycle.State.STARTED)) {
@@ -99,11 +96,8 @@ class NodeListScreen : Screen {
         val manageClients = remember(viewModel) {
             { viewModel.onEvent(NodeListContract.Event.ManageClientsClicked) }
         }
-        val toggleExpand = remember {
-            {
-                isAllExpanded = !isAllExpanded
-                Unit
-            }
+        val toggleExpand = remember(viewModel) {
+            { viewModel.onEvent(NodeListContract.Event.ToggleExpandedView) }
         }
 
         LaunchedEffect(Unit) {
@@ -137,7 +131,7 @@ class NodeListScreen : Screen {
 
         NodeListScaffoldContent(
                 state = state,
-                isAllExpanded = isAllExpanded,
+                isAllExpanded = state.isAllExpanded,
                 isTabletLandscape = adaptiveInfo.isTabletLandscape,
                 onBackClick = soundClick(navigateBack),
                 onManageClientsClick = soundClick(manageClients),

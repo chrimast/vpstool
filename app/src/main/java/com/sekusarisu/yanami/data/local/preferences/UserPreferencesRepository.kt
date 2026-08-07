@@ -39,6 +39,7 @@ class UserPreferencesRepository(private val context: Context) {
         private val CHART_ANIMATION_KEY = booleanPreferencesKey("chart_animation")
         private val BIOMETRIC_ENABLED_KEY = booleanPreferencesKey("biometric_enabled")
         private val TERMINAL_SNIPPETS_KEY = stringPreferencesKey("terminal_snippets")
+        private val NODE_LIST_EXPANDED_KEY = booleanPreferencesKey("node_list_expanded")
         const val DEFAULT_TERMINAL_FONT_SIZE = 20
     }
 
@@ -95,6 +96,13 @@ class UserPreferencesRepository(private val context: Context) {
         context.dataStore.edit { prefs ->
             prefs[TERMINAL_SNIPPETS_KEY] = json.encodeToString(snippets)
         }
+    }
+
+    val nodeListExpanded: Flow<Boolean> =
+            context.dataStore.data.map { prefs -> prefs[NODE_LIST_EXPANDED_KEY] ?: true }
+
+    suspend fun setNodeListExpanded(expanded: Boolean) {
+        context.dataStore.edit { it[NODE_LIST_EXPANDED_KEY] = expanded }
     }
 
     /** 设置字体缩放比例 */

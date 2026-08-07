@@ -120,7 +120,7 @@ val appModule = module {
     factory { (serverId: Long, forceTwoFa: Boolean) ->
         ServerReLoginViewModel(serverId, forceTwoFa, get(), androidContext())
     }
-    factory { NodeListViewModel(get(), get(), androidContext()) }
+    factory { NodeListViewModel(get(), get(), get(), androidContext()) }
     factory { ClientManagementViewModel(get(), get(), androidContext()) }
     factory { PingTaskManagementViewModel(get(), get(), get(), androidContext()) }
     factory { ClientCreateViewModel(get(), get(), androidContext()) }
@@ -128,5 +128,5 @@ val appModule = module {
     factory { SettingsViewModel(get(), get(), androidContext()) }
     factory { AboutViewModel(get(), androidContext()) }
     factory { (uuid: String) -> NodeDetailViewModel(uuid, get(), get(), get(), androidContext()) }
-    factory { (uuid: String) -> SshTerminalViewModel(uuid, get(), get(), get(), get()) }
+    factory { (uuid: String) -> SshTerminalViewModel(uuid, get(), get(), get(), get(), get()) }
 }

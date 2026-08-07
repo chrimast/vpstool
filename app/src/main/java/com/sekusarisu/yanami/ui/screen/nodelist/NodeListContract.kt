@@ -27,7 +27,8 @@ object NodeListContract {
             val totalNetOut: Long = 0,
             val totalTrafficUp: Long = 0,
             val totalTrafficDown: Long = 0,
-            val serverName: String = ""
+            val serverName: String = "",
+            val isAllExpanded: Boolean = true
     ) : UiState
 
     sealed interface Event : UiEvent {
@@ -38,6 +39,7 @@ object NodeListContract {
         data object Retry : Event
         data class NodeClicked(val uuid: String) : Event
         data object ManageClientsClicked : Event
+        data object ToggleExpandedView : Event
     }
 
     sealed interface Effect : UiEffect {

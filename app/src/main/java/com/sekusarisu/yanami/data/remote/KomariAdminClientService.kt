@@ -18,6 +18,8 @@ import kotlinx.serialization.builtins.ListSerializer
 import kotlinx.serialization.json.Json
 import kotlinx.serialization.json.JsonObject
 import kotlinx.serialization.json.buildJsonObject
+import kotlinx.serialization.json.jsonObject
+import kotlinx.serialization.json.jsonPrimitive
 import kotlinx.serialization.json.put
 
 class KomariAdminClientService(private val httpClient: HttpClient) {
@@ -134,6 +136,29 @@ class KomariAdminClientService(private val httpClient: HttpClient) {
         parseNoContent(response)
     }
 
+    suspend fun createRemoteSession(
+            baseUrl: String,
+            sessionToken: String,
+            authType: AuthType,
+            uuid: String
+    ): RemoteSessionDto {
+        val response =
+                httpClient.post(baseUrl.trimEnd('/') + "/api/admin/client/remote/session") {
+                    applyAdminAuth(sessionToken, authType)
+                    contentType(ContentType.Application.Json)
+                    setBody(buildJsonObject { put("uuid", uuid) }.toString())
+                }
+        val envelope = parseEnvelope(response.status.value, response.bodyAsText())
+        val data = envelope.data ?: throw AdminApiException(response.status.value, "响应缺少 data")
+        val sessionObject = data.jsonObject
+        return RemoteSessionDto(
+                sessionId = sessionObject["session_id"]?.jsonPrimitive?.content
+                        ?: throw AdminApiException(response.status.value, "响应缺少 session_id"),
+                browserTicket = sessionObject["browser_ticket"]?.jsonPrimitive?.content
+                        ?: throw AdminApiException(response.status.value, "响应缺少 browser_ticket")
+        )
+    }
+
     private fun io.ktor.client.request.HttpRequestBuilder.applyAdminAuth(
             sessionToken: String,
             authType: AuthType
@@ -186,3 +211,5 @@ class KomariAdminClientService(private val httpClient: HttpClient) {
 }
 
 class AdminApiException(val statusCode: Int, override val message: String) : Exception(message)
+
+data class RemoteSessionDto(val sessionId: String, val browserTicket: String)

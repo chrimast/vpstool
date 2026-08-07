@@ -451,12 +451,12 @@ private fun generateInstallCommand(
 
     return when (platform) {
         InstallPlatform.LINUX ->
-                "wget -qO- https://raw.githubusercontent.com/komari-monitor/komari-agent/refs/heads/main/install.sh | sudo bash -s -- " +
+                "wget -qO- https://raw.githubusercontent.com/nuomiiiii/komari-agent/refs/heads/main/install.sh | sudo bash -s -- " +
                         args.joinToString(" ")
         InstallPlatform.WINDOWS -> buildString {
             append("powershell.exe -NoProfile -ExecutionPolicy Bypass -Command ")
             append(
-                    "\"iwr 'https://raw.githubusercontent.com/komari-monitor/komari-agent/refs/heads/main/install.ps1' -UseBasicParsing -OutFile 'install.ps1'; & '.\\\\install.ps1'"
+                    "\"iwr 'https://raw.githubusercontent.com/nuomiiiii/komari-agent/refs/heads/main/install.ps1' -UseBasicParsing -OutFile 'install.ps1'; & '.\\\\install.ps1'"
             )
             args.forEach { arg ->
                 append(" '")
@@ -466,7 +466,7 @@ private fun generateInstallCommand(
             append("\"")
         }
         InstallPlatform.MACOS ->
-                "zsh <(curl -sL https://raw.githubusercontent.com/komari-monitor/komari-agent/refs/heads/main/install.sh) " +
+                "zsh <(curl -sL https://raw.githubusercontent.com/nuomiiiii/komari-agent/refs/heads/main/install.sh) " +
                         args.joinToString(" ")
     }
 }

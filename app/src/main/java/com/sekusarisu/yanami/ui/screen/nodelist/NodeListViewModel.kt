@@ -3,6 +3,7 @@ package com.sekusarisu.yanami.ui.screen.nodelist
 import android.content.Context
 import cafe.adriel.voyager.core.model.screenModelScope
 import com.sekusarisu.yanami.R
+import com.sekusarisu.yanami.data.local.preferences.UserPreferencesRepository
 import com.sekusarisu.yanami.domain.model.AuthType
 import com.sekusarisu.yanami.domain.model.Node
 import com.sekusarisu.yanami.domain.model.ServerInstance
@@ -23,6 +24,7 @@ import kotlinx.coroutines.launch
 class NodeListViewModel(
         private val nodeRepository: NodeRepository,
         private val serverRepository: ServerRepository,
+        private val userPreferencesRepository: UserPreferencesRepository,
         private val context: Context
 ) :
         MviViewModel<NodeListContract.State, NodeListContract.Event, NodeListContract.Effect>(
@@ -35,6 +37,11 @@ class NodeListViewModel(
     private var latestStreamRequest: NodeStatusStreamRequest? = null
 
     init {
+        screenModelScope.launch {
+            userPreferencesRepository.nodeListExpanded.collect { expanded ->
+                setState { copy(isAllExpanded = expanded) }
+            }
+        }
         loadNodes()
     }
 
@@ -71,6 +78,13 @@ class NodeListViewModel(
             }
             is NodeListContract.Event.ManageClientsClicked -> {
                 sendEffect(NodeListContract.Effect.NavigateToClientManagement)
+            }
+            is NodeListContract.Event.ToggleExpandedView -> {
+                val expanded = !currentState.isAllExpanded
+                setState { copy(isAllExpanded = expanded) }
+                screenModelScope.launch {
+                    userPreferencesRepository.setNodeListExpanded(expanded)
+                }
             }
         }
     }
