@@ -1,5 +1,5 @@
 <resources>
-    <string name="app_name">vpstool</string>
+    <string name="app_name">VPStool</string>
 
     <!-- Common -->
     <string name="action_back">Back</string>

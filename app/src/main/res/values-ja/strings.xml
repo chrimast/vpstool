@@ -1,5 +1,5 @@
 <resources>
-    <string name="app_name">vpstool</string>
+    <string name="app_name">VPStool</string>
 
     <!-- 共通 -->
     <string name="action_back">戻る</string>
